@@ -1,0 +1,70 @@
+Migrate:
+Schema::create('pacientes', function (Blueprint $table) {
+            $table->id();
+	        //Propio
+            $table->string('nombre_completo', 255);
+            $table->string('cedula', 20)->unique();
+            $table->integer('edad');
+            $table->enum('afiliacion',['militar','afiliado','pna','empleado']);
+            $table->enum('sexo', ['masculino', 'femenino']);
+            $table->timestamps();
+        });
+
+Schema::create('examenes', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre', 255);
+            $table->string('descripcion', 1000);
+            $table->timestamps();
+        });
+
+
+Schema::create('datos_examenes', function (Blueprint $table) {
+            $table->id();
+            //Propio
+            $table->foreignId('examen_id')->constrained('examenes')->onDelete('cascade');
+            $table->string('nombre', 255);
+            $table->enum('tipo_dato', ['numérico', 'texto']);
+            $table->string('unidad_medida', 100)->nullable();
+            $table->float('rango_min')->nullable();
+            $table->float('rango_max')->nullable();
+
+            $table->timestamps();
+        });
+
+Schema::create('solicitudes', function (Blueprint $table) {
+            $table->id();
+            //Propio
+            $table->string('codigo', 20)->unique();
+            $table->foreignId('paciente_id')->constrained('pacientes')->onDelete('cascade');
+            $table->enum('estado', ['proceso', 'pausado', 'cancelado', 'finalizado'])->default('proceso');
+            $table->enum('tipo', ['emergencia', 'rutina'])->default('rutina');
+            $table->timestamps();
+        });
+
+Schema::create('detalle_solicitudes', function (Blueprint $table) {
+            $table->id();
+            //Propio
+            $table->foreignId('solicitud_id')->constrained('solicitudes')->onDelete('cascade');
+            $table->foreignId('examen_id')->constrained('examenes')->onDelete('cascade');
+            $table->timestamps();
+        });
+
+Schema::create('resultados_examenes', function (Blueprint $table) {
+            $table->id();
+            //Propio
+            $table->foreignId('detalle_solicitud_id')->constrained('detalle_solicitudes')->onDelete('cascade');
+            $table->foreignId('dato_examen_id')->constrained('datos_examenes')->onDelete('cascade');
+            $table->text('valor')->nullable();
+            $table->timestamps();
+        });
+
+Schema::create('usuarios', function (Blueprint $table) {
+            $table->id();
+            //Propio
+            $table->string('nombre_completo', 255);
+            $table->string('cedula', 20)->unique();
+            $table->enum('cargo', ['bionalista', 'auxiliar', 'doctor', 'visitante']);
+            $table->string('email', 255)->unique();
+            $table->string('password');
+            $table->timestamps();
+        });
