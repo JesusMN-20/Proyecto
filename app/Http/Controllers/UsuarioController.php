@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Usuario;
 
 class UsuarioController extends Controller
 {
@@ -13,7 +14,8 @@ class UsuarioController extends Controller
      */
     public function index()
     {
-        //
+        $usuarios = Usuario::all();
+        return view('Usuarios.index', compact('usuarios'));
     }
 
     /**
@@ -23,7 +25,7 @@ class UsuarioController extends Controller
      */
     public function create()
     {
-        //
+        return view('usuarios.create');
     }
 
     /**
@@ -34,7 +36,13 @@ class UsuarioController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nombre_completo' => 'required|max:255',
+            'cedula' => 'required|unique:usuarios,cedula|max:20',
+            'cargo' => 'required|in:bionalista,auxiliar,doctor,visitante',
+            'email' => 'required|unique:usuarios,email',
+            'password' => 'required',
+        ]);
     }
 
     /**
@@ -43,9 +51,9 @@ class UsuarioController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Usuario $usuario)
     {
-        //
+        return view('usuarios.show',compact('usuario'));
     }
 
     /**
@@ -54,9 +62,9 @@ class UsuarioController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($usuario)
     {
-        //
+        return view('usuario.edit', compact('usuario'));
     }
 
     /**
@@ -66,9 +74,19 @@ class UsuarioController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Usuario $usuario)
     {
-        //
+        $request->validate([
+            'nombre_completo' => 'required|max:255',
+            'cedula' => 'required|unique:usuarios,cedula|max:20',
+            'cargo' => 'required|in:bionalista,auxiliar,doctor,visitante',
+            'email' => 'required|unique:usuarios,email',
+            'password' => 'required',
+        ]);
+
+        $usuario->update($request->all());
+
+        return redirect()->route('usuarios.index')->with('success', 'usuario actualizado correctamente');
     }
 
     /**
@@ -77,8 +95,10 @@ class UsuarioController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Usuario $usuario)
     {
-        //
+        $usuario->delete();
+
+        return redirect()->route('usuarios.index')->with('success', 'usuario eliminado correctamente');
     }
 }

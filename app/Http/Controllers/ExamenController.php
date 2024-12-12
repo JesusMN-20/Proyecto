@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Examen;
 
 class ExamenController extends Controller
 {
@@ -11,9 +12,11 @@ class ExamenController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    //Muestra todos los examenes;
     public function index()
     {
-        //
+        $examenes = Examen::all();
+        return view('examnes.index', compact('examenes'));
     }
 
     /**
@@ -21,9 +24,10 @@ class ExamenController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    //Crea un nuevo examen
     public function create()
     {
-        //
+        return view('examenes.create');
     }
 
     /**
@@ -32,9 +36,17 @@ class ExamenController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    // Guardar nuevo examen
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nombre' => 'required|max:255',
+            'descripcion' => 'nullable|max:1000',
+        ]);
+
+        Examen::create($request->all());
+
+        return redirect()->route('examenes.index')->with('success', 'Examen creado correctamente');
     }
 
     /**
@@ -43,9 +55,10 @@ class ExamenController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    // Mostrar un unico examen
+    public function show(Examen $examen)
     {
-        //
+        return view('examenes.show', compact('examen'));
     }
 
     /**
@@ -54,9 +67,10 @@ class ExamenController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    // Formulario para edictar examen
+    public function edit(Examen $examen)
     {
-        //
+        return view('examenes.edit',compact('examen'));
     }
 
     /**
@@ -66,9 +80,17 @@ class ExamenController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    // Actualizar 
+    public function update(Request $request, Examen $examen)
     {
-        //
+        $request->validate([
+            'nombre' => 'required|max:255',
+            'descripcion' => 'nullable|max:1000',
+        ]);
+
+        $examen->update($request->all());
+
+        return redirect()->route('examenes.index')->with('success', 'Examen actualizado correctamente');
     }
 
     /**
@@ -77,8 +99,11 @@ class ExamenController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    //Eliminar un examen
+    public function destroy(Examen $examen)
     {
-        //
+        $examen->delete();
+
+        return redirect()->route('examenes.index')->with('success', 'Examen eliminado correctamente');
     }
 }

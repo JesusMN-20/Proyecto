@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\ResultadoExamen;
+use App\Models\DetalleSolicitud;
+use App\Models\DatoExamen;
 
 class ResultadoExamenController extends Controller
 {
@@ -13,7 +16,8 @@ class ResultadoExamenController extends Controller
      */
     public function index()
     {
-        //
+        $resultados = ResultadoExamen::with(['detalleSolicitud', 'datoExamen'])->get();
+        return view('resultados_examenes.index', compact('resultados'));
     }
 
     /**
@@ -23,7 +27,9 @@ class ResultadoExamenController extends Controller
      */
     public function create()
     {
-        //
+        $detalleSolicitudes = DetalleSolicitud::all();
+        $datosExamenes = DatoExamen::all();
+        return view('resultados_examenes.create', compact('detalleSolicitudes', 'datosExamenes'));
     }
 
     /**
@@ -34,7 +40,15 @@ class ResultadoExamenController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'detalle_solicitud_id' => 'required|exists:detalle_solicitudes,id',
+            'dato_examen_id' => 'required|exists:datos_examenes,id',
+            'valor' => 'nullable',
+        ]);
+
+        ResultadoExamen::create($request->all());
+
+        return redirect()->route('resultados_examenes.index')->with('success', 'Resultado de examen creado correctamente');
     }
 
     /**
@@ -43,9 +57,9 @@ class ResultadoExamenController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(ResultadoExamen $resultadoExamen)
     {
-        //
+        return view('resultados_examenes.show', compact('resultadoExamen'));
     }
 
     /**
@@ -54,9 +68,11 @@ class ResultadoExamenController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(ResultadoExamen $resultadoExamen)
     {
-        //
+        $detalleSolicitudes = DetalleSolicitud::all();
+        $datosExamenes = DatoExamen::all();
+        return view('resultados_examenes.edit', compact('resultadoExamen', 'detalleSolicitudes', 'datosExamenes'));
     }
 
     /**
@@ -66,9 +82,17 @@ class ResultadoExamenController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, ResultadoExamen $resultadoExamen)
     {
-        //
+        $request->validate([
+            'detalle_solicitud_id' => 'required|exists:detalle_solicitudes,id',
+            'dato_examen_id' => 'required|exists:datos_examenes,id',
+            'valor' => 'nullable',
+        ]);
+
+        $resultadoExamen->update($request->all());
+
+        return redirect()->route('resultados_examenes.index')->with('success', 'Resultado de examen actualizado correctamente');
     }
 
     /**
@@ -77,8 +101,10 @@ class ResultadoExamenController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(ResultadoExamen $resultadoExamen)
     {
-        //
+        $resultadoExamen->delete();
+
+        return redirect()->route('resultados_examenes.index')->with('success', 'Resultado de examen eliminado correctamente');
     }
 }

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\DetalleSolicitud;
+use App\Models\Solicitud;
+use App\Models\Examen;
 
 class DetalleSolicitudController extends Controller
 {
@@ -13,7 +16,8 @@ class DetalleSolicitudController extends Controller
      */
     public function index()
     {
-        //
+        $detalles = DetalleSolicitud::with(['solicitud', 'examen'])->get();
+        return view('detalle_solicitudes.index', compact('detalles'));
     }
 
     /**
@@ -23,7 +27,9 @@ class DetalleSolicitudController extends Controller
      */
     public function create()
     {
-        //
+        $solicitudes = Solicitud::all();
+        $examenes = Examen::all();
+        return view('detalle_solicitudes.create', compact('solicitudes', 'examenes'));
     }
 
     /**
@@ -34,8 +40,16 @@ class DetalleSolicitudController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'solicitud_id' => 'required|exists:solicitudes,id',
+            'examen_id' => 'required|exists:examenes,id',
+        ]);
+
+        DetalleSolicitud::create($request->all());
+
+        return redirect()->route('detalle_solicitudes.index')->with('success', 'Detalle de solicitud creado correctamente');
     }
+
 
     /**
      * Display the specified resource.
@@ -43,9 +57,9 @@ class DetalleSolicitudController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(DetalleSolicitud $detalleSolicitud)
     {
-        //
+        return view('detalle_solicitudes.show', compact('detalleSolicitud'));
     }
 
     /**
@@ -54,9 +68,11 @@ class DetalleSolicitudController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(DetalleSolicitud $detalleSolicitud)
     {
-        //
+        $solicitudes = Solicitud::all();
+        $examenes = Examen::all();
+        return view('detalle_solicitudes.edit', compact('detalleSolicitud', 'solicitudes', 'examenes'));
     }
 
     /**
@@ -66,9 +82,16 @@ class DetalleSolicitudController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, DetalleSolicitud $detalleSolicitud)
     {
-        //
+        $request->validate([
+            'solicitud_id' => 'required|exists:solicitudes,id',
+            'examen_id' => 'required|exists:examenes,id',
+        ]);
+
+        $detalleSolicitud->update($request->all());
+
+        return redirect()->route('detalle_solicitudes.index')->with('success', 'Detalle de solicitud actualizado correctamente');
     }
 
     /**
@@ -77,8 +100,10 @@ class DetalleSolicitudController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(DetalleSolicitud $detalleSolicitud)
     {
-        //
+        $detalleSolicitud->delete();
+
+        return redirect()->route('detalle_solicitudes.index')->with('success', 'Detalle de solicitud eliminado correctamente');
     }
 }

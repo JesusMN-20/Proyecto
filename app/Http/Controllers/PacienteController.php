@@ -24,7 +24,7 @@ class PacienteController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    //Crear un nnuevo paciente
+    //Crear un nuevo paciente
     public function create()
     {
         return view('pacientes.create');

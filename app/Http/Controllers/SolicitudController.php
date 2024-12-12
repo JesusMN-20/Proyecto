@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Solicitud;
+use App\Models\Paciente;
 
 class SolicitudController extends Controller
 {
@@ -11,9 +13,11 @@ class SolicitudController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    // MUestra todas las solicitudes
     public function index()
     {
-        //
+        $solicitudes = Solicitud::with('paciente')->get();
+        return view('solicitudes.index', compact('solicitudes'));
     }
 
     /**
@@ -21,9 +25,11 @@ class SolicitudController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    //Crear una nueva solicitud
     public function create()
     {
-        //
+        $pacientes = Paciente::all();
+        return view('solicitudes.create', compact('pacientes'));
     }
 
     /**
@@ -32,9 +38,19 @@ class SolicitudController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    // 
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'codigo' => 'required|unique:solicitudes,codigo|max:20',
+            'paciente_id' => 'required|exists:pacientes,id',
+            'estado' => 'required|in:proceso,pausado,cancelado,finalizado',
+            'tipo' => 'required|in:emergencia,rutina',
+        ]);
+
+        Solicitud::create($request->all());
+
+        return redirect()->route('solicitudes.index')->with('success', 'Solicitud creada correctamente');
     }
 
     /**
@@ -43,9 +59,10 @@ class SolicitudController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    //
+    public function show(Solicitud $solicitud)
     {
-        //
+        return view('solicitudes.show', compact('solicitud'));
     }
 
     /**
@@ -54,9 +71,11 @@ class SolicitudController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    //
+    public function edit(Solicitud $solicitud)
     {
-        //
+        $pacientes = Paciente::all();
+        return view('solicitudes.edit', compact('solicitud', 'pacientes'));
     }
 
     /**
@@ -66,9 +85,19 @@ class SolicitudController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    //
+    public function update(Request $request, Solicitud $solicitud)
     {
-        //
+        $request->validate([
+            'codigo' => 'required|max:20|unique:solicitudes,codigo,' . $solicitud->id,
+            'paciente_id' => 'required|exists:pacientes,id',
+            'estado' => 'required|in:proceso,pausado,cancelado,finalizado',
+            'tipo' => 'required|in:emergencia,rutina',
+        ]);
+
+        $solicitud->update($request->all());
+
+        return redirect()->route('solicitudes.index')->with('success', 'Solicitud actualizada correctamente');
     }
 
     /**
@@ -77,8 +106,10 @@ class SolicitudController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Solicitud $solicitud)
     {
-        //
+        $solicitud->delete();
+
+        return redirect()->route('solicitudes.index')->with('success', 'Solicitud eliminada correctamente');
     }
 }
