@@ -37,12 +37,22 @@ class UsuarioController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nombre_completo' => 'required|max:255',
-            'cedula' => 'required|unique:usuarios,cedula|max:20',
+            'nombre_completo' => 'required|string|max:255',
+            'cedula' => 'required|string|max:20|unique:usuarios,cedula',
             'cargo' => 'required|in:bionalista,auxiliar,doctor,visitante',
-            'email' => 'required|unique:usuarios,email',
-            'password' => 'required',
+            'email' => 'required|email|max:255|unique:usuarios,email',
+            'password' => 'required|string|min:8',
         ]);
+
+        Usuario::create([
+            'nombre_completo' => $request->nombre_completo,
+            'cedula' => $request->cedula,
+            'cargo' => $request->cargo,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect()->route('usuarios.index')->with('success', 'Usuario creado correctamente');
     }
 
     /**
@@ -77,16 +87,22 @@ class UsuarioController extends Controller
     public function update(Request $request, Usuario $usuario)
     {
         $request->validate([
-            'nombre_completo' => 'required|max:255',
-            'cedula' => 'required|unique:usuarios,cedula|max:20',
+            'nombre_completo' => 'required|string|max:255',
+            'cedula' => 'required|string|max:20|unique:usuarios,cedula,' . $usuario->id,
             'cargo' => 'required|in:bionalista,auxiliar,doctor,visitante',
-            'email' => 'required|unique:usuarios,email',
-            'password' => 'required',
+            'email' => 'required|email|max:255|unique:usuarios,email,' . $usuario->id,
+            'password' => 'nullable|string|min:8',
         ]);
 
-        $usuario->update($request->all());
+        $usuario->update([
+            'nombre_completo' => $request->nombre_completo,
+            'cedula' => $request->cedula,
+            'cargo' => $request->cargo,
+            'email' => $request->email,
+            'password' => $request->password ? Hash::make($request->password) : $usuario->password,
+        ]);
 
-        return redirect()->route('usuarios.index')->with('success', 'usuario actualizado correctamente');
+        return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente');
     }
 
     /**
